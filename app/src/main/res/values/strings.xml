@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">SIMAPANSDM</string>
+    <string name="title_activity_main">MainActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+    <string name="menu_portal_berita">Portal Berita</string>
+    <string name="menu_open_data">Open Data</string>
+    <string name="menu_portal_ppid">Portal PPID</string>
+    <string name="menu_layanan_informasi">Pelayanan Publik</string>
+    <string name="menu_statistik">Informasi Statistik</string>
+    <string name="menu_agenda_kegiatan">Agenda Kegiatan</string>
+    <string name="submenu_stat_pelatihan">Statistik Peserta Pelatihan</string>
+    <string name="submenu_stat_kelulusan">Statistik Kelulusan Peserta</string>
+    <string name="submenu_stat_alumni">Statistik Alumni</string>
+    <string name="submenu_stat_wi">Statistik Widyaiswara</string>
+    <string name="submenu_hasil_evaluasi">Hasil Evaluasi Pelatihan</string>
+    <string name="submenu_capaian_anggaran">Capaian Anggaran</string>
+    <string name="submenu_stat_sdm">Statistik SDM</string>
+    <string name="submenu_stat_permohonan_informasi">Statistik Permohonan Informasi</string>
+</resources>
