@@ -19,19 +19,28 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        WebView myWebView = (WebView) findViewById(R.id.web_view);
-        myWebView.loadUrl("https://bpsdmd.jatengprov.go.id/dashboard/pns/Dashboard");
-
+        myWebView = findViewById(R.id.web_view);
         //enable Javascript
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
 
         myWebView.setWebViewClient(new WebViewClient());
         //myWebView.setWebViewClient(new MyWebViewClient());
-
+        myWebView.loadUrl("https://bpsdmd.jatengprov.go.id/dashboard/pns/Dashboard");
     }
 
-/*    @Override
+    @Override
+    public void onBackPressed() {
+        // jika tombol back pada android di-klik kembali ke halaman web sebelumnya (jika bisa)
+        if(myWebView.canGoBack()){
+            myWebView.goBack();
+        }
+        else{
+            super.onBackPressed();
+        }
+    }
+
+    /*    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // Check if the key event was the Back button and if there's history
         if ((keyCode == KeyEvent.KEYCODE_BACK) && myWebView.canGoBack()) {
