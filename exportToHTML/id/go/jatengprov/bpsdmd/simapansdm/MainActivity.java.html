@@ -1,0 +1,226 @@
+<html>
+<head>
+<title>MainActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #808080;}
+.s3 { color: #6897bb;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+MainActivity.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">id.go.jatengprov.bpsdmd.simapansdm</span><span class="s0">;</span>
+
+<span class="s0">import </span><span class="s1">android.app.Activity</span><span class="s0">;</span>
+<span class="s2">//import android.support.v7.app.AppCompatActivity;</span>
+<span class="s0">import </span><span class="s1">android.app.DownloadManager</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.app.ProgressDialog</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.content.ActivityNotFoundException</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.os.Build</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.os.Bundle</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.os.Environment</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.webkit.CookieManager</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.webkit.DownloadListener</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.webkit.URLUtil</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.webkit.ValueCallback</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.webkit.WebChromeClient</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.webkit.WebView</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.webkit.WebViewClient</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.webkit.WebSettings</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.content.Intent</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.net.Uri</span><span class="s0">;</span>
+<span class="s2">//import android.view.KeyEvent;</span>
+<span class="s0">import </span><span class="s1">android.widget.Toast</span><span class="s0">;</span>
+
+<span class="s0">import </span><span class="s1">androidx.swiperefreshlayout.widget.SwipeRefreshLayout</span><span class="s0">;</span>
+
+
+<span class="s0">public class </span><span class="s1">MainActivity </span><span class="s0">extends </span><span class="s1">Activity {</span>
+    <span class="s0">private </span><span class="s1">WebView myWebView = </span><span class="s0">null;</span>
+    <span class="s0">private </span><span class="s1">SwipeRefreshLayout swipe</span><span class="s0">;</span>
+
+    <span class="s0">private </span><span class="s1">ValueCallback&lt;Uri&gt; mUploadMessage</span><span class="s0">;</span>
+    <span class="s0">public </span><span class="s1">ValueCallback&lt;Uri[]&gt; uploadMessage</span><span class="s0">;</span>
+    <span class="s0">public static final int </span><span class="s1">REQUEST_SELECT_FILE = </span><span class="s3">100</span><span class="s0">;</span>
+    <span class="s0">private final static int </span><span class="s1">FILECHOOSER_RESULTCODE = </span><span class="s3">1</span><span class="s0">;</span>
+
+    <span class="s1">@Override</span>
+    <span class="s0">protected void </span><span class="s1">onCreate(Bundle savedInstanceState) {</span>
+        <span class="s0">super</span><span class="s1">.onCreate(savedInstanceState)</span><span class="s0">;</span>
+        <span class="s1">setContentView(R.layout.activity_main)</span><span class="s0">;</span>
+
+        <span class="s2">// alamat websitenya</span>
+        <span class="s1">String alamatUtama = </span><span class="s4">&quot;https://bpsdmd.jatengprov.go.id/dashboard/pns/Dashboard&quot;</span><span class="s0">;</span>
+        <span class="s1">String getAlamat = </span><span class="s4">&quot;&quot;</span><span class="s0">;</span>
+
+        <span class="s2">// progres dialog ketika memuat halaman</span>
+        <span class="s0">final </span><span class="s1">ProgressDialog progressDialog = </span><span class="s0">new </span><span class="s1">ProgressDialog(</span><span class="s0">this</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">progressDialog.setMessage(</span><span class="s4">&quot;Memuat data...&quot;</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">progressDialog.setCancelable(</span><span class="s0">true</span><span class="s1">)</span><span class="s0">;</span>
+
+        <span class="s2">// action ketika layar ditarik ke bawah (refresh)</span>
+        <span class="s1">swipe = findViewById(R.id.swipe)</span><span class="s0">;</span>
+        <span class="s1">swipe.setOnRefreshListener(</span><span class="s0">new </span><span class="s1">SwipeRefreshLayout.OnRefreshListener() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">onRefresh() {</span>
+                <span class="s1">LoadWeb(getAlamat)</span><span class="s0">;</span>
+            <span class="s1">}</span>
+        <span class="s1">})</span><span class="s0">;</span>
+
+        <span class="s1">LoadWeb(alamatUtama)</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s0">public void </span><span class="s1">LoadWeb(String url){</span>
+        <span class="s1">myWebView = findViewById(R.id.web_view)</span><span class="s0">;</span>
+        <span class="s2">//enable Javascript</span>
+        <span class="s1">WebSettings webSettings = myWebView.getSettings()</span><span class="s0">;</span>
+        <span class="s1">webSettings.setJavaScriptEnabled(</span><span class="s0">true</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">webSettings.setAllowFileAccess(</span><span class="s0">true</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">webSettings.setAllowContentAccess(</span><span class="s0">true</span><span class="s1">)</span><span class="s0">;</span>
+
+        <span class="s1">myWebView.setWebViewClient(</span><span class="s0">new </span><span class="s1">WebViewClient())</span><span class="s0">;</span>
+        <span class="s2">//myWebView.setWebViewClient(new MyWebViewClient());</span>
+
+        <span class="s0">if</span><span class="s1">(url.equals(</span><span class="s4">&quot;&quot;</span><span class="s1">)){</span>
+            <span class="s1">url = myWebView.getUrl()</span><span class="s0">;</span>
+        <span class="s1">}</span>
+        <span class="s1">myWebView.loadUrl(url)</span><span class="s0">;</span>
+
+        <span class="s2">// konfigurasi Chrome client untuk progress dialog dan upload file</span>
+        <span class="s1">myWebView.setWebChromeClient(</span><span class="s0">new </span><span class="s1">WebChromeClient() {</span>
+            <span class="s0">public void </span><span class="s1">onProgressChanged(WebView view</span><span class="s0">, int </span><span class="s1">progress) {</span>
+<span class="s2">/*                if (progress &lt; 100) { 
+                    progressDialog.show(); 
+                } 
+                if (progress == 100) { 
+                    progressDialog.dismiss(); 
+                }*/</span>
+
+                <span class="s2">//loading akan jalan lagi ketika masuk link lain</span>
+                <span class="s2">// dan akan berhenti saat loading selesai</span>
+                <span class="s0">if</span><span class="s1">(myWebView.getProgress()== </span><span class="s3">100</span><span class="s1">){</span>
+                    <span class="s1">swipe.setRefreshing(</span><span class="s0">false</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s1">} </span><span class="s0">else </span><span class="s1">{</span>
+                    <span class="s1">swipe.setRefreshing(</span><span class="s0">true</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+
+            <span class="s2">// For 3.0+ Devices (Start)</span>
+            <span class="s2">// onActivityResult attached before constructor</span>
+            <span class="s0">protected void </span><span class="s1">openFileChooser(ValueCallback uploadMsg</span><span class="s0">, </span><span class="s1">String acceptType) {</span>
+                <span class="s1">mUploadMessage = uploadMsg</span><span class="s0">;</span>
+                <span class="s1">Intent i = </span><span class="s0">new </span><span class="s1">Intent(Intent.ACTION_GET_CONTENT)</span><span class="s0">;</span>
+                <span class="s1">i.addCategory(Intent.CATEGORY_OPENABLE)</span><span class="s0">;</span>
+                <span class="s1">i.setType(</span><span class="s4">&quot;image/*&quot;</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s1">startActivityForResult(Intent.createChooser(i</span><span class="s0">, </span><span class="s4">&quot;File Browser&quot;</span><span class="s1">)</span><span class="s0">, </span><span class="s1">FILECHOOSER_RESULTCODE)</span><span class="s0">;</span>
+            <span class="s1">}</span>
+
+
+            <span class="s2">// For Lollipop 5.0+ Devices</span>
+            <span class="s0">public boolean </span><span class="s1">onShowFileChooser(WebView mWebView</span><span class="s0">, </span><span class="s1">ValueCallback&lt;Uri[]&gt; filePathCallback</span><span class="s0">, </span><span class="s1">WebChromeClient.FileChooserParams fileChooserParams) {</span>
+                <span class="s0">if </span><span class="s1">(uploadMessage != </span><span class="s0">null</span><span class="s1">) {</span>
+                    <span class="s1">uploadMessage.onReceiveValue(</span><span class="s0">null</span><span class="s1">)</span><span class="s0">;</span>
+                    <span class="s1">uploadMessage = </span><span class="s0">null;</span>
+                <span class="s1">}</span>
+
+                <span class="s1">uploadMessage = filePathCallback</span><span class="s0">;</span>
+
+                <span class="s1">Intent intent = </span><span class="s0">null;</span>
+                <span class="s0">if </span><span class="s1">(android.os.Build.VERSION.SDK_INT &gt;= android.os.Build.VERSION_CODES.LOLLIPOP) {</span>
+                    <span class="s1">intent = fileChooserParams.createIntent()</span><span class="s0">;</span>
+                <span class="s1">}</span>
+                <span class="s0">try </span><span class="s1">{</span>
+                    <span class="s1">startActivityForResult(intent</span><span class="s0">, </span><span class="s1">REQUEST_SELECT_FILE)</span><span class="s0">;</span>
+                <span class="s1">} </span><span class="s0">catch </span><span class="s1">(ActivityNotFoundException e) {</span>
+                    <span class="s1">uploadMessage = </span><span class="s0">null;</span>
+                    <span class="s0">return false;</span>
+                <span class="s1">}</span>
+                <span class="s0">return true;</span>
+            <span class="s1">}</span>
+
+            <span class="s2">//For Android 4.1 only</span>
+            <span class="s0">protected void </span><span class="s1">openFileChooser(ValueCallback&lt;Uri&gt; uploadMsg</span><span class="s0">, </span><span class="s1">String acceptType</span><span class="s0">, </span><span class="s1">String capture) {</span>
+                <span class="s1">mUploadMessage = uploadMsg</span><span class="s0">;</span>
+                <span class="s1">Intent intent = </span><span class="s0">new </span><span class="s1">Intent(Intent.ACTION_GET_CONTENT)</span><span class="s0">;</span>
+                <span class="s1">intent.addCategory(Intent.CATEGORY_OPENABLE)</span><span class="s0">;</span>
+                <span class="s1">intent.setType(</span><span class="s4">&quot;image/*&quot;</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s1">startActivityForResult(Intent.createChooser(intent</span><span class="s0">, </span><span class="s4">&quot;File Browser&quot;</span><span class="s1">)</span><span class="s0">, </span><span class="s1">FILECHOOSER_RESULTCODE)</span><span class="s0">;</span>
+            <span class="s1">}</span>
+
+            <span class="s0">protected void </span><span class="s1">openFileChooser(ValueCallback&lt;Uri&gt; uploadMsg) {</span>
+                <span class="s1">mUploadMessage = uploadMsg</span><span class="s0">;</span>
+                <span class="s1">Intent i = </span><span class="s0">new </span><span class="s1">Intent(Intent.ACTION_GET_CONTENT)</span><span class="s0">;</span>
+                <span class="s1">i.addCategory(Intent.CATEGORY_OPENABLE)</span><span class="s0">;</span>
+                <span class="s1">i.setType(</span><span class="s4">&quot;image/*&quot;</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s1">startActivityForResult(Intent.createChooser(i</span><span class="s0">, </span><span class="s4">&quot;File Chooser&quot;</span><span class="s1">)</span><span class="s0">, </span><span class="s1">FILECHOOSER_RESULTCODE)</span><span class="s0">;</span>
+            <span class="s1">}</span>
+
+        <span class="s1">})</span><span class="s0">;</span>
+
+        <span class="s2">// action ketika mendownload file</span>
+        <span class="s1">myWebView.setDownloadListener(</span><span class="s0">new </span><span class="s1">DownloadListener() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">onDownloadStart(String url</span><span class="s0">, </span><span class="s1">String userAgent</span><span class="s0">, </span><span class="s1">String contentDisposition</span><span class="s0">, </span><span class="s1">String mimeType</span><span class="s0">, long </span><span class="s1">contentLength) {</span>
+                <span class="s1">DownloadManager.Request request = </span><span class="s0">new </span><span class="s1">DownloadManager.Request(Uri.parse(url))</span><span class="s0">;</span>
+                <span class="s1">request.setMimeType(mimeType)</span><span class="s0">;</span>
+                <span class="s1">String cookies = CookieManager.getInstance().getCookie(url)</span><span class="s0">;</span>
+                <span class="s1">request.addRequestHeader(</span><span class="s4">&quot;cookie&quot;</span><span class="s0">, </span><span class="s1">cookies)</span><span class="s0">;</span>
+                <span class="s1">request.addRequestHeader(</span><span class="s4">&quot;User-Agent&quot;</span><span class="s0">, </span><span class="s1">userAgent)</span><span class="s0">;</span>
+                <span class="s1">request.setDescription(</span><span class="s4">&quot;Mengunduh berkas...&quot;</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s1">request.setTitle(URLUtil.guessFileName(url</span><span class="s0">, </span><span class="s1">contentDisposition</span><span class="s0">, </span><span class="s1">mimeType))</span><span class="s0">;</span>
+                <span class="s1">request.allowScanningByMediaScanner()</span><span class="s0">;</span>
+                <span class="s1">request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)</span><span class="s0">;</span>
+                <span class="s1">request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS</span><span class="s0">, </span><span class="s1">URLUtil.guessFileName(url</span><span class="s0">, </span><span class="s1">contentDisposition</span><span class="s0">, </span><span class="s1">mimeType))</span><span class="s0">;</span>
+                <span class="s1">DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE)</span><span class="s0">;</span>
+                <span class="s1">dm.enqueue(request)</span><span class="s0">;</span>
+                <span class="s1">Toast.makeText(getApplicationContext()</span><span class="s0">, </span><span class="s4">&quot;Mengunduh berkas...&quot;</span><span class="s0">, </span><span class="s1">Toast.LENGTH_LONG).show()</span><span class="s0">;</span>
+            <span class="s1">}</span>
+        <span class="s1">})</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">// Memproses hasil unggahan</span>
+    <span class="s1">@Override</span>
+    <span class="s0">public void </span><span class="s1">onActivityResult(</span><span class="s0">int </span><span class="s1">requestCode</span><span class="s0">, int </span><span class="s1">resultCode</span><span class="s0">, </span><span class="s1">Intent intent) {</span>
+        <span class="s0">super</span><span class="s1">.onActivityResult(requestCode</span><span class="s0">, </span><span class="s1">resultCode</span><span class="s0">, </span><span class="s1">intent)</span><span class="s0">;</span>
+        <span class="s0">if </span><span class="s1">(Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.LOLLIPOP) {</span>
+            <span class="s0">if </span><span class="s1">(requestCode == REQUEST_SELECT_FILE) {</span>
+                <span class="s0">if </span><span class="s1">(uploadMessage == </span><span class="s0">null</span><span class="s1">)</span>
+                    <span class="s0">return;</span>
+                <span class="s1">uploadMessage.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode</span><span class="s0">, </span><span class="s1">intent))</span><span class="s0">;</span>
+                <span class="s1">uploadMessage = </span><span class="s0">null;</span>
+            <span class="s1">}</span>
+        <span class="s1">} </span><span class="s0">else if </span><span class="s1">(requestCode == FILECHOOSER_RESULTCODE) {</span>
+            <span class="s0">if </span><span class="s1">(</span><span class="s0">null </span><span class="s1">== mUploadMessage)</span>
+                <span class="s0">return;</span>
+            <span class="s2">// Use MainActivity.RESULT_OK if you're implementing WebView inside Fragment</span>
+            <span class="s2">// Use RESULT_OK only if you're implementing WebView inside an Activity</span>
+            <span class="s1">Uri result = intent == </span><span class="s0">null </span><span class="s1">|| resultCode != MainActivity.RESULT_OK ? </span><span class="s0">null </span><span class="s1">: intent.getData()</span><span class="s0">;</span>
+            <span class="s1">mUploadMessage.onReceiveValue(result)</span><span class="s0">;</span>
+            <span class="s1">mUploadMessage = </span><span class="s0">null;</span>
+        <span class="s1">}</span>
+        <span class="s0">else</span>
+            <span class="s1">Toast.makeText(MainActivity.</span><span class="s0">this</span><span class="s1">.getApplicationContext()</span><span class="s0">, </span><span class="s4">&quot;Gagal mengunggah berkas&quot;</span><span class="s0">, </span><span class="s1">Toast.LENGTH_LONG).show()</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s2">// jika tombol back pada android di-klik, kembali ke halaman web sebelumnya (jika bisa)</span>
+    <span class="s1">@Override</span>
+    <span class="s0">public void </span><span class="s1">onBackPressed() {</span>
+        <span class="s0">if</span><span class="s1">(myWebView.canGoBack()){</span>
+            <span class="s1">myWebView.goBack()</span><span class="s0">;</span>
+        <span class="s1">}</span>
+        <span class="s0">else</span><span class="s1">{</span>
+            <span class="s0">super</span><span class="s1">.onBackPressed()</span><span class="s0">;</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+
+<span class="s1">}</span></pre>
+</body>
+</html>
